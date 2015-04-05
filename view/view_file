@@ -1,0 +1,93 @@
+<section>
+	<h2>Каталог Видань</h2>
+	<?php echo anchor('admin/catalog_izdanii/edit', '<i class="icon-plus"></i> Додати Видання'); ?>
+
+        
+ <?php echo validation_errors(); ?>
+<?php echo form_open_multipart();?> 
+        
+<table class="table table-striped">
+    <thead>
+            <tr>
+                    <th width="20%" align="right">Видання</th>
+                    <th width="20%">Редагувати</th>
+                    <th width="20%">Статус</th>
+                    <th width="20%">Видалити</th>
+                    <th width="20%">Показати на головній?</th>
+            </tr>
+    </thead>
+</table>
+            <ul id="edit_menu" class="ui-sortable">	
+            <?php if(count($edition_list)): 
+                foreach($edition_list->result() as $edition): ?>
+                    <!--td-->
+                    <li class="menu_item" id="<?php echo $edition->id; ?>">
+                        <table class="table table-striped">
+                            <tr>
+                                <td align="right" width="20%"><?php echo anchor('admin/catalog_izdanii/edit/' . $edition->id, $edition->name); ?></td>
+                                <td width="20%"><?php echo btn_edit('admin/catalog_izdanii/edit/' . $edition->id); ?></td>
+                                <td width="20%">
+                                    <?php if($edition->status == 'active'){$status = 'Активно';}else{$status = 'Неактивно';}; ?>
+                                    <?php echo $status; ?>
+                                </td>
+                                <td width="20%">
+                                    <?php echo btn_delete('admin/catalog_izdanii/delete/' . $edition->id); ?>
+                                </td>
+                                <td>
+                                    <?php if($edition->display_on_main=='yes')
+                                            {echo 'вже на головній';
+                                        }else{
+                                            echo form_checkbox("display_on_main[]", set_value("display_on_main[]", $edition->id));
+                                        } 
+                                    ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </li>
+                    <!--/td-->
+                <?php endforeach; ?>
+            <?php endif; ?>	
+            </ul>
+        <div>
+            <?php echo form_submit('submit', 'Застосувати', 'class="btn btn-primary"'); ?>
+        </div>
+<?php echo form_close();?> 
+        <!--tr>
+    </tbody>
+	</table-->    
+<p id="message"></p>
+</section>
+
+<script type="text/javascript">
+
+$(document).ready(function()
+{    
+    $('#edit_menu').sortable(
+    {
+        axis: 'y',
+        opacity: 0.6,
+        //placeholder: 'menu_item',
+        stop: function()
+        {
+            var menu_punkts = $('#edit_menu').sortable("toArray");
+            //alert(menu_punkts);
+            $.ajax(
+            {
+                url: '../sorting/change_editions_order.php',
+                type: 'POST',
+                data: {punkts: menu_punkts},
+                //data: punkts = menu_punkts,
+                error: function()
+                {
+                    $('#message').text("Ошибка!");
+                },
+                success: function(data)
+    {
+        $('#message').fadeIn(400).text("Успешно сохранено!").fadeOut(1200);
+        console.log(menu_punkts);
+    }    
+            });
+        }
+    });
+});
+</script>
